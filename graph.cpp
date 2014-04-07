@@ -22,6 +22,10 @@ void Union(int* parents, int* ranks, int x, int y){
     }
 }
 
+double dist(std::pair<double, double> p1, std::pair<double,double> p2){
+	return (sqrt(((p1.first-p2.first)*(p1.first-p2.first))+((p1.second-p2.second)*(p1.second-p2.second))));
+}
+
 Graph::Graph(std::vector<std::pair<double,double> >& vertexList){
 	vertices = vertexList;
 	N=vertices.size();
@@ -45,10 +49,31 @@ Graph::~Graph(){
 	delete Adj;
 }
 
+void Graph::Del(){
+	Delaunay dt;
+	std::vector< std::pair<Point,unsigned> > points;		//Sensor positions
+	int i=0;
+	for(std::vector<std::pair<double, double> >::iterator it = vertices.begin(); it != vertices.end(); it++){
+		points.push_back( std::make_pair( Point(it->first,it->second), i++));
+	}
+	dt.insert(points.begin(),points.end());
+
+	for(Delaunay::Finite_edges_iterator it = dt.finite_edges_begin(); it != dt.finite_edges_end(); ++it){
+		Delaunay::Edge e=*it;
+		int i1= e.first->vertex((e.second+1)%3)->info();
+		int i2= e.first->vertex((e.second+2)%3)->info();
+		edges.push_back(std::make_pair(i1,i2));
+//		heap.push(std::make_pair(dist(vertices[i1],vertices[i2]), std::make_pair(i1,i2)));
+		Adj[i1][i2] = true;
+	}
+}
+
 void Graph::MST(){
 	std::vector<std::pair<int, int> > temp_edges;
 	EdgeHeap temp_heap;
-
+	for(std::vector<std::pair<int, int> >::iterator it; it!=edges.end(); it++){
+		temp_heap.push(std::make_pair(dist(vertices[it->first],vertices[it->second]), std::make_pair(it->first,it->second)));
+	}
 	int *parents = new int[N];
 	int *ranks = new int[N];
 	for(int i=0;i<N;i++){
@@ -56,17 +81,15 @@ void Graph::MST(){
 		ranks[i] = 0;
 	}
 	while(temp_edges.size()!=N-1){
-		std::pair<int,int> e = heap.top().second;
+		std::pair<int,int> e = temp_heap.top().second;
 		if(find(parents,e.first) != find(parents,e.second)){
 			temp_edges.push_back(e);
-			temp_heap.push(heap.top());
 			Union(parents,ranks,e.first,e.second);
 		}
-		heap.pop();
+		temp_heap.pop();
 	}
 
 	edges = temp_edges;
-	heap = temp_heap;
 	return;
 }
 
