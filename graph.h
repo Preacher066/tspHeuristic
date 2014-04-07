@@ -1,10 +1,12 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Triangulation_vertex_base_with_info_2.h>
+#include "GEOM\GeomPerfectMatching.h"
 #include <vector>
 #include <cstdio>
 #include <queue>
 #include <set>
+#include <map>
 #include <assert.h>
 
 typedef boost::minstd_rand													base_generator_type;
@@ -22,10 +24,10 @@ public:
 	void MST();
 	void dfsTSP();
 	void Del();
+	void PMatch();
 	void drawGraph(FILE* svg, double MAX);
 	int N;
 	bool** Adj;
 	std::vector<std::pair<double,double> > vertices;
 	std::vector<std::pair<int, int> > edges;
-	EdgeHeap heap;
 };

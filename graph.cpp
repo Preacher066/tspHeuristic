@@ -41,8 +41,6 @@ Graph::Graph(std::vector<std::pair<double,double> >& vertexList){
 Graph::~Graph(){
 	edges.clear();
 	vertices.clear();
-	EdgeHeap h;
-	heap=h;		//erasing heap
 	for(int i=0;i<N;i++){
 		delete Adj[i];
 	}
@@ -71,7 +69,7 @@ void Graph::Del(){
 void Graph::MST(){
 	std::vector<std::pair<int, int> > temp_edges;
 	EdgeHeap temp_heap;
-	for(std::vector<std::pair<int, int> >::iterator it; it!=edges.end(); it++){
+	for(std::vector<std::pair<int, int> >::iterator it=edges.begin(); it!=edges.end(); it++){
 		temp_heap.push(std::make_pair(dist(vertices[it->first],vertices[it->second]), std::make_pair(it->first,it->second)));
 	}
 	int *parents = new int[N];
@@ -91,6 +89,35 @@ void Graph::MST(){
 
 	edges = temp_edges;
 	return;
+}
+
+void Graph::PMatch(){
+	GeomPerfectMatching gmpm(vertices.size(),2);
+
+	//setting options
+	gmpm.gpm_options.init_Delaunay =	0;
+	gmpm.gpm_options.init_greedy =		0;
+	gmpm.gpm_options.init_KNN =			0;
+	gmpm.gpm_options.iter_max =			1;
+
+	//sending vertices
+	GeomPerfectMatching::REAL* V = new int[2*vertices.size()];
+	std::map<GeomPerfectMatching::PointId,int> Indices;
+	for(int i=0;i<vertices.size();i++){
+		V[2*i] = vertices[i].first;
+		V[2*i+1] = vertices[i].second;
+		Indices[gmpm.AddPoint(V+(2*i))] = i;
+	}
+
+	//sending edges
+	for(int i=0;i<edges.size();i++){
+		gmpm.AddInitialEdge(Indices[edges[i].first], Indices[edges[i].second]);
+	}
+
+	gmpm.SolveComplete();
+
+
+
 }
 
 void Graph::drawGraph(FILE* svg,double MAX){
