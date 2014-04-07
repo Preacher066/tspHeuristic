@@ -15,7 +15,7 @@ typedef CGAL::Triangulation_vertex_base_with_info_2<unsigned int, Kernel>	Vb;
 typedef CGAL::Triangulation_data_structure_2<Vb>							Tds;
 typedef CGAL::Delaunay_triangulation_2<Kernel, Tds>							Delaunay;
 typedef Kernel::Point_2														Point;
-typedef std::priority_queue<std::pair<double, std::pair<int,int> > > EdgeHeap;
+typedef std::priority_queue<std::pair<double, std::pair<int,int> > >		EdgeHeap;
 
 class Graph{
 public:

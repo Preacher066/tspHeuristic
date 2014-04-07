@@ -102,22 +102,33 @@ void Graph::PMatch(){
 
 	//sending vertices
 	GeomPerfectMatching::REAL* V = new int[2*vertices.size()];
-	std::map<GeomPerfectMatching::PointId,int> Indices;
-	for(int i=0;i<vertices.size();i++){
+	std::map<GeomPerfectMatching::PointId,int> IndexMap;
+	GeomPerfectMatching::PointId* Indices = new GeomPerfectMatching::PointId[vertices.size()];
+	bool* marker = new bool[vertices.size()];
+	for(unsigned int i=0;i<vertices.size();i++){
 		V[2*i] = vertices[i].first;
 		V[2*i+1] = vertices[i].second;
-		Indices[gmpm.AddPoint(V+(2*i))] = i;
+		GeomPerfectMatching::PointId d = gmpm.AddPoint(V+(2*i));
+		IndexMap[d] = i;
+		Indices[i] = d;
+		marker[i] = false;
 	}
 
 	//sending edges
-	for(int i=0;i<edges.size();i++){
-		gmpm.AddInitialEdge(Indices[edges[i].first], Indices[edges[i].second]);
+	for(unsigned int i=0;i<edges.size();i++){
+		gmpm.AddInitialEdge(IndexMap[edges[i].first], IndexMap[edges[i].second]);
 	}
 
 	gmpm.SolveComplete();
 
-
-
+	std::vector<std::pair<int, int> > temp_edges;
+	for(unsigned int i=0;i<vertices.size();i++){
+		if(marker[i]) continue;
+		int j = IndexMap[gmpm.GetMatch(Indices[i])];
+		temp_edges.push_back(std::make_pair(i,j));
+		marker[j] = marker[i] = true;
+	}
+	edges = temp_edges;
 }
 
 void Graph::drawGraph(FILE* svg,double MAX){

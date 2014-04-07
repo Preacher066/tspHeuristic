@@ -30,7 +30,8 @@ int main() {
 
 	Graph g(vertices);
 	g.Del();
-	g.MST();
+	//g.MST();
+	g.PMatch();
 	fopen_s(&svg,"dfsTSP.svg","w");
 	g.drawGraph(svg,MAX);
 	fclose(svg);
