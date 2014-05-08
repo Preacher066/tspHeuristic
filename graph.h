@@ -15,7 +15,11 @@ typedef CGAL::Triangulation_vertex_base_with_info_2<unsigned int, Kernel>	Vb;
 typedef CGAL::Triangulation_data_structure_2<Vb>							Tds;
 typedef CGAL::Delaunay_triangulation_2<Kernel, Tds>							Delaunay;
 typedef Kernel::Point_2														Point;
+typedef std::pair<int, int>													Edge;
 typedef std::priority_queue<std::pair<double, std::pair<int,int> > >		EdgeHeap;
+typedef std::vector<std::pair<int, int> >									EdgeVector;
+typedef std::set<std::pair<int, int> >										EdgeSet;
+typedef std::vector<std::pair<double, double> >								VxVector;
 
 class Graph{
 public:
@@ -25,6 +29,7 @@ public:
 	void dfsTSP();
 	void Del();
 	void PMatch();
+	void OddMatch();
 	void drawGraph(FILE* svg, double MAX);
 	int N;
 	bool** Adj;

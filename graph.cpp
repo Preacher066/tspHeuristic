@@ -131,6 +131,37 @@ void Graph::PMatch(){
 	edges = temp_edges;
 }
 
+void Graph::OddMatch(){
+	
+	//listing the odd degree vertices in oddDegree vector
+	VxVector oddDegree;
+	std::vector<int> matchKeeper;
+	int* degParity = new int[vertices.size()];
+	for(int i=0;i<vertices.size();i++){
+		degParity[i] = 0;
+	}
+	for(EdgeVector::iterator it=edges.begin();it!=edges.end();it++){
+		degParity[it->first] = 1-degParity[it->first];
+		degParity[it->second] = 1-degParity[it->second];
+	}
+	for(int i=0;i<vertices.size();i++){
+		if(degParity[i] == 1){		//odd degree vertices; ofcourse here we are assuming no duplicate edges.
+			oddDegree.push_back(vertices[i]);
+			matchKeeper.push_back(i);
+		}
+	}
+
+	//doing the perfect matching in the odd degree vertices
+	Graph oddGraph(oddDegree);
+	EdgeSet edgeSet(edges.begin(), edges.end());
+	oddGraph.PMatch();
+	for(EdgeVector::iterator it = oddGraph.edges.begin(); it != oddGraph.edges.end(); it++){
+		Edge edge = std::make_pair(matchKeeper[it->first], matchKeeper[it->second]);
+		if(edgeSet.find(edge) != edgeSet.end())
+			edges.push_back(edge);
+	}
+}
+
 void Graph::drawGraph(FILE* svg,double MAX){
 	fprintf(svg,"<svg width=\"%.3f\" height=\"%.3f\" xmlns=\"http://www.w3.org/2000/svg\">\n", MAX, MAX+50.0);
 	fprintf(svg,"<g>\n");
