@@ -31,6 +31,7 @@ public:
 	void PMatch();
 	void OddMatch();
 	void drawGraph(FILE* svg, double MAX);
+	void drawGraphT(FILE* svg, double MAX);
 	int N;
 	bool** Adj;
 	std::vector<std::pair<double,double> > vertices;

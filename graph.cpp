@@ -2,6 +2,8 @@
 
 extern void drawPoint(double x, double y);
 extern void drawLine(double x1, double y1, double x2, double y2);
+extern FILE *svg;
+extern double MAX;
 
 int find(int* parents, int i){
 if (parents[i] != i)
@@ -88,6 +90,7 @@ void Graph::MST(){
 	}
 
 	edges = temp_edges;
+	//drawGraph(svg, MAX);
 	return;
 }
 
@@ -152,13 +155,16 @@ void Graph::OddMatch(){
 	}
 
 	//doing the perfect matching in the odd degree vertices
+	//not adding duplicate edges
+	//so if a matching reuslts in two odd vertices joining which already have an edge between them, then that edge is not added
 	Graph oddGraph(oddDegree);
 	EdgeSet edgeSet(edges.begin(), edges.end());
 	oddGraph.PMatch();
+	//oddGraph.drawGraphT(svg, MAX);
 	for(EdgeVector::iterator it = oddGraph.edges.begin(); it != oddGraph.edges.end(); it++){
 		Edge edge = std::make_pair(matchKeeper[it->first], matchKeeper[it->second]);
-		if(edgeSet.find(edge) != edgeSet.end())
-			edges.push_back(edge);
+		if(edgeSet.find(edge) != edgeSet.end());
+		else edges.push_back(edge);
 	}
 }
 
@@ -175,6 +181,17 @@ void Graph::drawGraph(FILE* svg,double MAX){
 	//drawing edges
 	for(std::vector<std::pair<int, int> >::iterator it = edges.begin();it!=edges.end();it++){
 		fprintf(svg,"<line x1=\"%.3f\" y1=\"%.3f\" x2=\"%.3f\" y2=\"%.3f\" stroke=\"#ff0000\" stroke-width=\"0.5\" fill-opacity=\"1.0\" fill=\"none\"/>",vertices[it->first].first,vertices[it->first].second,vertices[it->second].first,vertices[it->second].second);
+	}
+
+	fprintf(svg,"</g>\n</svg>\n");
+
+	return;
+}
+
+void Graph::drawGraphT(FILE* svg,double MAX){
+	//drawing edges
+	for(std::vector<std::pair<int, int> >::iterator it = edges.begin();it!=edges.end();it++){
+		fprintf(svg,"<line x1=\"%.3f\" y1=\"%.3f\" x2=\"%.3f\" y2=\"%.3f\" stroke=\"#00ff00\" stroke-width=\"3\" stroke-opacity=\"0.5\" fill=\"none\"/>",vertices[it->first].first,vertices[it->first].second,vertices[it->second].first,vertices[it->second].second);
 	}
 
 	fprintf(svg,"</g>\n</svg>\n");

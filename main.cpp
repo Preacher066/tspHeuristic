@@ -5,7 +5,7 @@
 #include "graph.h"
 
 
-int SEED=11, NUM_SENSORS=50;
+int SEED=13, NUM_SENSORS=50;
 double MAX=1000.0;
 base_generator_type generator(SEED);
 boost::uniform_real<> uni_dist(0.0,MAX);
@@ -18,6 +18,7 @@ extern void drawLine(double x1, double y1, double x2, double y2);
 double dist(std::pair<double, double> p1, std::pair<double,double> p2);
 
 int main() {
+	fopen_s(&svg,"dfsTSP.svg","w");
 	std::vector<std::pair<double, double> > vertices;
 	//std::vector<std::pair<double, double> >& v = vertices;
 
@@ -30,10 +31,9 @@ int main() {
 
 	Graph g(vertices);
 	g.Del();
-	//g.MST();
-	g.PMatch();
-	fopen_s(&svg,"dfsTSP.svg","w");
-	g.drawGraph(svg,MAX);
+	g.MST();
+	g.OddMatch();
+	g.drawGraph(svg, MAX);
 	fclose(svg);
 
 	std::cin.get();
