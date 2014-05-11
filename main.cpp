@@ -5,7 +5,7 @@
 #include "graph.h"
 
 
-int SEED=13, NUM_SENSORS=50;
+int SEED=15, NUM_SENSORS=50;
 double MAX=1000.0;
 base_generator_type generator(SEED);
 boost::uniform_real<> uni_dist(0.0,MAX);
