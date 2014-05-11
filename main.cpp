@@ -35,7 +35,7 @@ int main() {
 	g.OddMatch();
 	g.drawGraph(svg, MAX);
 	fclose(svg);
-
+	//latest
 	std::cin.get();
 	return 0;
 }
