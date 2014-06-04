@@ -5,7 +5,7 @@
 #include "graph.h"
 
 
-int SEED=15, NUM_SENSORS=50;
+int SEED=15, NUM_SENSORS=20;
 double MAX=1000.0;
 base_generator_type generator(SEED);
 boost::uniform_real<> uni_dist(0.0,MAX);
@@ -33,9 +33,11 @@ int main() {
 	g.Del();
 	g.MST();
 	g.OddMatch();
+	g.AdjLister();
+	g.TSPCircuit();
 	g.drawGraph(svg, MAX);
 	fclose(svg);
-	//latest
+
 	std::cin.get();
 	return 0;
 }

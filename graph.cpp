@@ -31,22 +31,28 @@ double dist(std::pair<double, double> p1, std::pair<double,double> p2){
 Graph::Graph(std::vector<std::pair<double,double> >& vertexList){
 	vertices = vertexList;
 	N=vertices.size();
-	Adj = new bool*[N];
+	visited = new bool[N];
+	marked = new bool[N];
+	AdjList = new std::vector<int>[N];
+	AdjList[N-1].push_back(1);
+	AdjList[N-1].clear();
 	for(int i=0;i<N;i++){
-		Adj[i] = new bool[N];
-		for(int j=0;j<N;j++){
-			Adj[i][j] = false;
-		}
+		marked[i] = false;
+		visited[i] = false;
 	}
 }
 
 Graph::~Graph(){
 	edges.clear();
 	vertices.clear();
+	eCircuit.clear();
+	TSP.clear();
+	delete visited;
+	delete marked;
 	for(int i=0;i<N;i++){
-		delete Adj[i];
+		AdjList[i].clear();
 	}
-	delete Adj;
+	delete [] AdjList;
 }
 
 void Graph::Del(){
@@ -64,7 +70,7 @@ void Graph::Del(){
 		int i2= e.first->vertex((e.second+2)%3)->info();
 		edges.push_back(std::make_pair(i1,i2));
 //		heap.push(std::make_pair(dist(vertices[i1],vertices[i2]), std::make_pair(i1,i2)));
-		Adj[i1][i2] = true;
+//		Adj[i1][i2] = true;
 	}
 }
 
@@ -91,6 +97,109 @@ void Graph::MST(){
 
 	edges = temp_edges;
 	//drawGraph(svg, MAX);
+	return;
+}
+
+void Graph::AdjLister(){
+	for(EdgeVector::iterator it = edges.begin(); it!=edges.end(); it++){
+		AdjList[it->first].push_back(it->second);
+		AdjList[it->second].push_back(it->first);
+	}
+	for(int i=0; i<N; i++){
+		if(AdjList[i].size()==1) marked[i]=true;
+		std::sort(AdjList[i].begin(), AdjList[i].end());
+	}
+}
+
+int Graph::reachableCount(int v){
+	int counter=0;
+	for(std::vector<int>::iterator it = AdjList[v].begin(); it!=AdjList[v].end(); it++){
+		if(visited[*it] == false){
+			visited[*it]=true;
+			counter+=reachableCount(*it);
+		}
+	}
+	return (counter + 1);
+}
+
+bool Graph::isReachable(int v1, int v2){			//Assumes that the visited array is clear
+	visited[v1] = true;
+	if(std::binary_search(AdjList[v1].begin(), AdjList[v1].end(),v2)) return true;
+	for(std::vector<int>::iterator it = AdjList[v1].begin(); it!=AdjList[v1].end(); it++){
+		if(!visited[*it] && isReachable(*it,v2)){
+			return true;
+		}
+	}
+	return false;
+}
+
+void Graph::EulerCircuit(int v){
+	eCircuit.push_back(v);
+	if(AdjList[v].size() == 0) return;
+
+	//finding single edge neighbors for v
+	int i=0;
+	while(i < AdjList[v].size()){
+		int v1 = AdjList[v][i];
+		if(AdjList[v1].size()==1 && marked[v1]){
+			eCircuit.push_back(v1);
+			eCircuit.push_back(v);
+			AdjList[v1].erase(std::lower_bound(AdjList[v1].begin(),AdjList[v1].end(),v));
+			AdjList[v].erase(AdjList[v].begin()+i);
+		}
+		else i++;
+	}
+	if(AdjList[v].size() == 0) return;
+
+	//finding all non-bridges
+	i=0;
+	while(i<AdjList[v].size()){
+		for(int j=0;j<N;j++){
+			visited[j] = false;
+		}
+		
+		int v2 = AdjList[v][i];
+		//remove the edge v--i
+		AdjList[v2].erase(std::lower_bound(AdjList[v2].begin(),AdjList[v2].end(),v));
+		AdjList[v].erase(AdjList[v].begin()+i);
+
+		//test whether v is still reachable from v2
+		if(isReachable(v2,v)){	//if yes then EulerCircuit(v2)
+			EulerCircuit(v2);
+			return;
+		}
+		else{					//This edge is a bridge. Restore the edge and try other vertices adjacent to v.
+			AdjList[v].push_back(v2);
+			std::sort(AdjList[v].begin(), AdjList[v].end());
+			AdjList[v2].push_back(v);
+			std::sort(AdjList[v2].begin(), AdjList[v2].end());
+			i++;
+		}
+	}
+
+	//by this point, all of the incident edges on v are bridges
+	//so pick any one and follow it
+
+	int v3 = *(AdjList[v].begin());
+
+	//but don't forget to erase this edge too
+	AdjList[v3].erase(std::lower_bound(AdjList[v3].begin(),AdjList[v3].end(),v));
+	AdjList[v].erase(AdjList[v].begin());
+
+	EulerCircuit(v3);
+	return;
+}
+
+void Graph::TSPCircuit(){
+	EulerCircuit(0);
+	bool* v = new bool[N];
+	for(int k=0;k<N;k++){
+		v[k]=false;
+	}
+	for(std::vector<int>::iterator it = eCircuit.begin(); it!=eCircuit.end();it++){
+		if(!v[*it]){TSP.push_back(*it);v[*it]=true;}
+	}
+	TSP.push_back(TSP[0]);
 	return;
 }
 
@@ -162,9 +271,10 @@ void Graph::OddMatch(){
 	oddGraph.PMatch();
 	//oddGraph.drawGraphT(svg, MAX);
 	for(EdgeVector::iterator it = oddGraph.edges.begin(); it != oddGraph.edges.end(); it++){
-		Edge edge = std::make_pair(matchKeeper[it->first], matchKeeper[it->second]);
-		if(edgeSet.find(edge) != edgeSet.end());
-		else edges.push_back(edge);
+		Edge e1 = std::make_pair(matchKeeper[it->first], matchKeeper[it->second]);
+		Edge e2 = std::make_pair(e1.second, e1.first);
+		if(edgeSet.find(e1) != edgeSet.end() || edgeSet.find(e2) != edgeSet.end());
+		else edges.push_back(e1);
 	}
 }
 
@@ -175,12 +285,22 @@ void Graph::drawGraph(FILE* svg,double MAX){
 	fprintf(svg,"<rect height=\"%.3f\" width=\"%.3f\" x=\"%.3f\" y=\"%.3f\" stroke-width=\"0\" stroke=\"#000000\" fill-opacity=\"0.5\" fill=\"#000000\"/>\n",MAX,MAX,0.0,0.0);	// the gray background of the whole field
 
 	//drawing vertices
-	for(std::vector<std::pair<double, double> >::iterator it = vertices.begin();it!=vertices.end();it++){
-		fprintf(svg,"<circle r=\"2.4814\" cx=\"%.3f\" cy=\"%.3f\" stroke-width=\"5\" stroke=\"#000000\" fill=\"#ff0000\"/>\n",it->first,it->second);
+	int i=0;
+	for(std::vector<std::pair<double, double> >::iterator it = vertices.begin();it!=vertices.end();it++,i++){
+		fprintf(svg,"<circle r=\"2.5\" cx=\"%.3f\" cy=\"%.3f\" stroke-width=\"5\" stroke=\"#000000\" fill=\"#ff0000\"/>\n",it->first,it->second);
+		fprintf(svg, "<text x=\"%.3f\" y=\"%.3f\" fill=\"red\"> %d </text>", it->first+2.5,it->second+2.5, i);
 	}
 	//drawing edges
 	for(std::vector<std::pair<int, int> >::iterator it = edges.begin();it!=edges.end();it++){
 		fprintf(svg,"<line x1=\"%.3f\" y1=\"%.3f\" x2=\"%.3f\" y2=\"%.3f\" stroke=\"#ff0000\" stroke-width=\"0.5\" fill-opacity=\"1.0\" fill=\"none\"/>",vertices[it->first].first,vertices[it->first].second,vertices[it->second].first,vertices[it->second].second);
+	}
+
+	for(int i = 1; i<TSP.size(); i++){
+		drawArrow(svg, TSP[i-1], TSP[i]);
+	}
+
+	for(int j = 0; j<vertices.size(); j++){
+		fprintf(svg, "<text x=\"%.3f\" y=\"10.0\" fill=\"red\"> _%d_ </text>", 10.0+(j*30.0), eCircuit[j]);
 	}
 
 	fprintf(svg,"</g>\n</svg>\n");
@@ -188,13 +308,7 @@ void Graph::drawGraph(FILE* svg,double MAX){
 	return;
 }
 
-void Graph::drawGraphT(FILE* svg,double MAX){
-	//drawing edges
-	for(std::vector<std::pair<int, int> >::iterator it = edges.begin();it!=edges.end();it++){
-		fprintf(svg,"<line x1=\"%.3f\" y1=\"%.3f\" x2=\"%.3f\" y2=\"%.3f\" stroke=\"#00ff00\" stroke-width=\"3\" stroke-opacity=\"0.5\" fill=\"none\"/>",vertices[it->first].first,vertices[it->first].second,vertices[it->second].first,vertices[it->second].second);
-	}
-
-	fprintf(svg,"</g>\n</svg>\n");
-
+void Graph::drawArrow(FILE* svg, int p1, int p2){
+	fprintf(svg,"<line x1=\"%.3f\" y1=\"%.3f\" x2=\"%.3f\" y2=\"%.3f\" stroke=\"#00ff00\" stroke-width=\"3\" stroke-opacity=\"0.5\" fill=\"none\"/>",vertices[p1].first,vertices[p1].second,vertices[p2].first,vertices[p2].second);
 	return;
 }
