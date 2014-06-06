@@ -18,7 +18,7 @@ extern void drawLine(double x1, double y1, double x2, double y2);
 double dist(std::pair<double, double> p1, std::pair<double,double> p2);
 
 int main() {
-	fopen_s(&svg,"dfsTSP.svg","w");
+	svg=fopen("dfsTSP.svg","w");
 	std::vector<std::pair<double, double> > vertices;
 	//std::vector<std::pair<double, double> >& v = vertices;
 
