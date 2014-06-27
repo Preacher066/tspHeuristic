@@ -31,14 +31,10 @@ double dist(std::pair<double, double> p1, std::pair<double,double> p2){
 Graph::Graph(std::vector<std::pair<double,double> >& vertexList){
 	vertices = vertexList;
 	N=vertices.size();
-	visited = new bool[N];
-	marked = new bool[N];
 	AdjList = new std::vector<int>[N];
-	AdjList[N-1].push_back(1);
-	AdjList[N-1].clear();
 	for(int i=0;i<N;i++){
-		marked[i] = false;
-		visited[i] = false;
+		marked.push_back(false);
+		visited.push_back(false);
 	}
 }
 
@@ -46,15 +42,31 @@ Graph::~Graph(){
 	edges.clear();
 	vertices.clear();
 	eCircuit.clear();
+	marked.clear();
+	visited.clear();
 	TSP.clear();
-	delete visited;
-	delete marked;
 	for(int i=0;i<N;i++){
 		AdjList[i].clear();
 	}
 	delete [] AdjList;
 }
 
+/*
+Clears the edges and other data from graph to compute TSP anew
+*/
+void Graph::Purge(){
+	edges.clear();
+	eCircuit.clear();
+	TSP.clear();
+	for(int i=0;i<N;i++){
+		visited[i] = false;
+		marked[i] = false;
+	}
+}
+
+/*
+	Produces the delaunay triangulation of this graph
+*/
 void Graph::Del(){
 	Delaunay dt;
 	std::vector< std::pair<Point,unsigned> > points;		//Sensor positions
@@ -69,11 +81,12 @@ void Graph::Del(){
 		int i1= e.first->vertex((e.second+1)%3)->info();
 		int i2= e.first->vertex((e.second+2)%3)->info();
 		edges.push_back(std::make_pair(i1,i2));
-//		heap.push(std::make_pair(dist(vertices[i1],vertices[i2]), std::make_pair(i1,i2)));
-//		Adj[i1][i2] = true;
 	}
 }
 
+/*
+	Produces MST of this graph
+*/
 void Graph::MST(){
 	std::vector<std::pair<int, int> > temp_edges;
 	EdgeHeap temp_heap;
@@ -96,10 +109,12 @@ void Graph::MST(){
 	}
 
 	edges = temp_edges;
-	//drawGraph(svg, MAX);
 	return;
 }
 
+/*
+	Produces Adjacency list of this graph in the form of an array of vectors
+*/
 void Graph::AdjLister(){
 	for(EdgeVector::iterator it = edges.begin(); it!=edges.end(); it++){
 		AdjList[it->first].push_back(it->second);
@@ -109,17 +124,6 @@ void Graph::AdjLister(){
 		if(AdjList[i].size()==1) marked[i]=true;
 		std::sort(AdjList[i].begin(), AdjList[i].end());
 	}
-}
-
-int Graph::reachableCount(int v){
-	int counter=0;
-	for(std::vector<int>::iterator it = AdjList[v].begin(); it!=AdjList[v].end(); it++){
-		if(visited[*it] == false){
-			visited[*it]=true;
-			counter+=reachableCount(*it);
-		}
-	}
-	return (counter + 1);
 }
 
 bool Graph::isReachable(int v1, int v2){			//Assumes that the visited array is clear
@@ -133,6 +137,9 @@ bool Graph::isReachable(int v1, int v2){			//Assumes that the visited array is c
 	return false;
 }
 
+/*
+	Produces Euler circuit of this graph
+*/
 void Graph::EulerCircuit(int v){
 	eCircuit.push_back(v);
 	if(AdjList[v].size() == 0) return;
@@ -190,19 +197,10 @@ void Graph::EulerCircuit(int v){
 	return;
 }
 
-void Graph::TSPCircuit(){
-	EulerCircuit(0);
-	bool* v = new bool[N];
-	for(int k=0;k<N;k++){
-		v[k]=false;
-	}
-	for(std::vector<int>::iterator it = eCircuit.begin(); it!=eCircuit.end();it++){
-		if(!v[*it]){TSP.push_back(*it);v[*it]=true;}
-	}
-	TSP.push_back(TSP[0]);
-	return;
-}
-
+/*
+	Perfect matching algorithm from Kolmogorov's Bolssom package
+	used in OddMatch function
+*/
 void Graph::PMatch(){
 	GeomPerfectMatching gmpm(vertices.size(),2);
 
@@ -243,6 +241,10 @@ void Graph::PMatch(){
 	edges = temp_edges;
 }
 
+/*
+	Used in producing Euler circuit of the graph,
+	perfectly matches odd degree vertices
+*/
 void Graph::OddMatch(){
 	
 	//listing the odd degree vertices in oddDegree vector
@@ -276,6 +278,43 @@ void Graph::OddMatch(){
 		if(edgeSet.find(e1) != edgeSet.end() || edgeSet.find(e2) != edgeSet.end());
 		else edges.push_back(e1);
 	}
+}
+
+/*
+	Produces TSP circuit of this graph and returns the resulting cycle's weight
+*/
+double Graph::TSPCircuit(bool refresh){
+	if(refresh){
+		delete [] AdjList;
+		int N1=N;
+		N=vertices.size();
+		AdjList = new std::vector<int>[N];
+		for(int i=0;i<N-N1;i++){
+			marked.push_back(false);
+			visited.push_back(false);
+		}
+	}
+	if(N==1) return 0.0;
+	if(N==2) return dist(vertices[0],vertices[1]);
+	Del();
+	MST();
+	OddMatch();
+	AdjLister();
+	EulerCircuit(0);
+	double weight=0.0;
+	bool* v = new bool[N];
+	for(int k=0;k<N;k++){
+		v[k]=false;
+	}
+	for(std::vector<int>::iterator it = eCircuit.begin();it!=eCircuit.end();it++){
+		if(!v[*it]){TSP.push_back(*it);v[*it]=true;}
+		if(TSP.size() >= 2){
+			weight+=dist(vertices[*(TSP.end()-1)], vertices[*(TSP.end()-2)]);
+		}
+	}
+	TSP.push_back(TSP[0]);
+	weight+=dist(vertices[*(TSP.end()-1)], vertices[TSP[0]]);
+	return weight;
 }
 
 void Graph::drawGraph(FILE* svg,double MAX){

@@ -2,7 +2,7 @@
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
-#include "graph.h"
+#include "steiner.h"
 
 
 int SEED=15, NUM_SENSORS=20;
@@ -18,26 +18,29 @@ extern void drawLine(double x1, double y1, double x2, double y2);
 double dist(std::pair<double, double> p1, std::pair<double,double> p2);
 
 int main() {
-	fopen_s(&svg,"dfsTSP.svg","w");
+	/*fopen_s(&svg,"dfsTSP.svg","w");
 	std::vector<std::pair<double, double> > vertices;
-	//std::vector<std::pair<double, double> >& v = vertices;
 
 	for(int i = 0; i < NUM_SENSORS; i++){
 		double x = uni();
 		double y = uni();
-		//points.push_back( std::make_pair( Point(x,y), i ) );
 		vertices.push_back(std::make_pair(x,y));
 	}
 
 	Graph g(vertices);
-	g.Del();
-	g.MST();
-	g.OddMatch();
-	g.AdjLister();
-	g.TSPCircuit();
+	g.TSPCircuit(false);
 	g.drawGraph(svg, MAX);
-	fclose(svg);
+	fclose(svg);*/
 
-	std::cin.get();
+	
+
+	//assert(_access("STrees\\1.vrt", 06)==0 && _access("STrees\\1.edg", 06)==0);
+	//assert(edg && vrt);
+	Steiner s;
+	s.T = 400.0;
+	s.driver(96);
+	s.drawSteiner(&svg);
+
+//	std::cin.get();
 	return 0;
 }
