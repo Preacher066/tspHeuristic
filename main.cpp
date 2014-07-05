@@ -18,29 +18,29 @@ extern void drawLine(double x1, double y1, double x2, double y2);
 double dist(std::pair<double, double> p1, std::pair<double,double> p2);
 
 int main() {
-	/*fopen_s(&svg,"dfsTSP.svg","w");
-	std::vector<std::pair<double, double> > vertices;
+/*fopen_s(&svg,"dfsTSP.svg","w");
+std::vector<std::pair<double, double> > vertices;
 
-	for(int i = 0; i < NUM_SENSORS; i++){
-		double x = uni();
-		double y = uni();
-		vertices.push_back(std::make_pair(x,y));
-	}
+for(int i = 0; i < NUM_SENSORS; i++){
+double x = uni();
+double y = uni();
+vertices.push_back(std::make_pair(x,y));
+}
 
-	Graph g(vertices);
-	g.TSPCircuit(false);
-	g.drawGraph(svg, MAX);
-	fclose(svg);*/
+Graph g(vertices);
+g.TSPCircuit(false);
+g.drawGraph(svg, MAX);
+fclose(svg);*/
 
-	
 
-	//assert(_access("STrees\\1.vrt", 06)==0 && _access("STrees\\1.edg", 06)==0);
-	//assert(edg && vrt);
-	Steiner s;
-	//s.T = 400.0;
-	//s.driver(96);
-	s.drawSteiner(&svg);
 
-//	std::cin.get();
-	return 0;
+//assert(_access("STrees\\1.vrt", 06)==0 && _access("STrees\\1.edg", 06)==0);
+//assert(edg && vrt);
+Steiner s;
+//s.T = 400.0;
+//s.driver(96);
+s.drawSteiner(&svg);
+
+// std::cin.get();
+return 0;
 }
