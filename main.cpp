@@ -37,8 +37,8 @@ int main() {
 	//assert(_access("STrees\\1.vrt", 06)==0 && _access("STrees\\1.edg", 06)==0);
 	//assert(edg && vrt);
 	Steiner s;
-	s.T = 400.0;
-	s.driver(96);
+	//s.T = 400.0;
+	//s.driver(96);
 	s.drawSteiner(&svg);
 
 //	std::cin.get();

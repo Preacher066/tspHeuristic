@@ -9,40 +9,37 @@ double currT;
 std::queue<int> boundary;
 
 Steiner::Steiner(){
-	std::ifstream vrt("STrees\\3.vrt");
-	std::ifstream edg("STrees\\3.edg");
-	std::vector<std::pair<double, double> > tvertices;		//temp vertices. After eliminating duplicates from file input, we push into vertices
+	//std::ifstream vrt("Steiners\\greedy0.edg");
+	FILE* edg = fopen("Steiners\\50\\greedy0.edg","r");
+	std::set<std::pair<double, double> > tvertices;
 	std::map<std::pair<double, double>, int> edgeMaker;
+	std::map<std::pair<double, double>, int> SMaker;
 	double x=0.0,y=0.0;
-	int s=0,i=0;
-	while(!vrt.eof()){
-		vrt >> x >> y >> s;
+	int s1=0,s2=0;
+	while(fscanf(edg,"%lf %lf %d",&x,&y,&s1)!=EOF){
+		//vrt >> x >> y >> s;
 		std::pair<double, double> v = std::make_pair(x,y);
-		tvertices.push_back(v);
-		if(s!=0) steiner.push_back(true);
-		else steiner.push_back(false);
+		tvertices.insert(v);
+		SMaker[v] = s1;
 		visited.push_back(false);
+		steiner.push_back(false);
 	}
 
-	//eliminating duplicates (apparently there are!!)
-	std::sort(tvertices.begin(),tvertices.end());
-	for(int i=tvertices.size()-1;i>=1;i--){
-		if(tvertices[i]!=tvertices[i-1]){
-			vertices.push_back(tvertices[i]);
-		}
-	}
-	vertices.push_back(tvertices[0]);
+	int i=0;
 
-	for(int i=0; i<vertices.size();i++){
-		edgeMaker[vertices[i]]=i;
+	for(std::set<std::pair<double, double> >::iterator it = tvertices.begin();it!=tvertices.end();it++,i++){
+		vertices.push_back(*it);
+		if(SMaker[*it]==1) steiner[i]=true;
+		edgeMaker[*it] = i;
 	}
+	fclose(edg);
 
+	edg = fopen("Steiners\\50\\greedy0.edg","r");
 	edges = new std::set<int>[vertices.size()];
 	double x1=0.0,y1=0.0;
 	double x2=0.0,y2=0.0;
-	while(!edg.eof()){
-		edg >> x1 >> y1 >> s;
-		edg >> x2 >> y2 >> s;
+	while(fscanf(edg,"%lf %lf %d",&x1,&y1,&s1)!=EOF){
+		fscanf(edg,"%lf %lf %d",&x2,&y2,&s2);
 		std::pair<double, double> v1 = std::make_pair(x1,y1);
 		std::pair<double, double> v2 = std::make_pair(x2,y2);
 		int i1 = edgeMaker[v1];
@@ -51,6 +48,7 @@ Steiner::Steiner(){
 		edges[i2].insert(i1);
 		edgeList.push_back(std::make_pair(i1,i2));
 	}
+	fclose(edg);
 }
 
 Steiner::~Steiner(){
@@ -141,7 +139,7 @@ void Steiner::driver(int root){
 }
 
 void Steiner::drawSteiner(FILE** svg){
-	*svg=fopen("new3.svg", "w");
+	*svg=fopen("g0.svg", "w");
 	fprintf(*svg,"<svg width=\"%.3f\" height=\"%.3f\" xmlns=\"http://www.w3.org/2000/svg\">\n", MAX, MAX+50.0);
 	fprintf(*svg,"<g>\n");
 	fprintf(*svg,"<title>Layer 1</title>\n");
@@ -150,7 +148,7 @@ void Steiner::drawSteiner(FILE** svg){
 	//drawing vertices
 	int i=0;
 	for(std::vector<std::pair<double, double> >::iterator it = vertices.begin();it!=vertices.end();it++,i++){
-		if(!steiner[i]) fprintf(*svg,"<circle r=\"3\" cx=\"%.3f\" cy=\"%.3f\" fill=\"#ff0000\"/>\n",it->first,it->second);
+		if(steiner[i] == 0) fprintf(*svg,"<circle r=\"3\" cx=\"%.3f\" cy=\"%.3f\" fill=\"#ff0000\"/>\n",it->first,it->second);
 		else fprintf(*svg,"<circle r=\"2\" cx=\"%.3f\" cy=\"%.3f\" fill=\"#000000\"/>\n",it->first,it->second);
 		//fprintf(*svg, "<text x=\"%.3f\" y=\"%.3f\" style=\"fill: #ff0000; stroke: none; font-size: 11px;\"> %d </text>", it->first+2.5,it->second+2.5, i);
 	}
