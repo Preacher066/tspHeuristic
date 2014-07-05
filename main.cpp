@@ -20,7 +20,7 @@ double dist(std::pair<double, double> p1, std::pair<double,double> p2);
 int main() {
 /*fopen_s(&svg,"dfsTSP.svg","w");
 std::vector<std::pair<double, double> > vertices;
-
+//this is rsteiner
 for(int i = 0; i < NUM_SENSORS; i++){
 double x = uni();
 double y = uni();
