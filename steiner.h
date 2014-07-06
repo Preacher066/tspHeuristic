@@ -4,11 +4,12 @@
 
 class Steiner{
 public:
-Steiner();
+Steiner(char* edgName);
 ~Steiner();
-void drawSteiner(FILE** svg);
+void drawSteiner(FILE* svg);
 bool explorer();
 void driver(int root);
+void cleanTour(std::vector<std::pair<double,double> >& vert);
 
 double T;
 std::vector<std::pair<double,double> > vertices;
@@ -18,4 +19,5 @@ std::vector<std::pair<int,int> > edgeList;
 std::vector<bool> steiner;
 std::set<std::vector<std::pair<double, double> > > tours;
 std::priority_queue<std::pair<double, std::pair<int,int> > > heap;
+std::map<std::pair<double, double>, int> edgeMaker;
 };

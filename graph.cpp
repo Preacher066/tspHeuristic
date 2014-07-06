@@ -266,17 +266,16 @@ void Graph::OddMatch(){
 	}
 
 	//doing the perfect matching in the odd degree vertices
-	//not adding duplicate edges
-	//so if a matching reuslts in two odd vertices joining which already have an edge between them, then that edge is not added
+	//duplicate edges are included intentionally
 	Graph oddGraph(oddDegree);
 	EdgeSet edgeSet(edges.begin(), edges.end());
 	oddGraph.PMatch();
 	//oddGraph.drawGraphT(svg, MAX);
 	for(EdgeVector::iterator it = oddGraph.edges.begin(); it != oddGraph.edges.end(); it++){
 		Edge e1 = std::make_pair(matchKeeper[it->first], matchKeeper[it->second]);
-		Edge e2 = std::make_pair(e1.second, e1.first);
+		/*Edge e2 = std::make_pair(e1.second, e1.first);
 		if(edgeSet.find(e1) != edgeSet.end() || edgeSet.find(e2) != edgeSet.end());
-		else edges.push_back(e1);
+		else*/ edges.push_back(e1);
 	}
 }
 
@@ -295,7 +294,12 @@ double Graph::TSPCircuit(bool refresh){
 		}
 	}
 	if(N==1) return 0.0;
-	if(N==2) return dist(vertices[0],vertices[1]);
+	if(N==2) {
+		TSP.push_back(0);
+		TSP.push_back(1);
+		TSP.push_back(0);
+		return 2*dist(vertices[0],vertices[1]);
+	}
 	Del();
 	MST();
 	OddMatch();
@@ -318,6 +322,7 @@ double Graph::TSPCircuit(bool refresh){
 }
 
 void Graph::drawGraph(FILE* svg,double MAX){
+	double offset=MAX/2.0;
 	fprintf(svg,"<svg width=\"%.3f\" height=\"%.3f\" xmlns=\"http://www.w3.org/2000/svg\">\n", MAX, MAX+50.0);
 	fprintf(svg,"<g>\n");
 	fprintf(svg,"<title>Layer 1</title>\n");
@@ -326,19 +331,19 @@ void Graph::drawGraph(FILE* svg,double MAX){
 	//drawing vertices
 	int i=0;
 	for(std::vector<std::pair<double, double> >::iterator it = vertices.begin();it!=vertices.end();it++,i++){
-		fprintf(svg,"<circle r=\"2.5\" cx=\"%.3f\" cy=\"%.3f\" stroke-width=\"5\" stroke=\"#000000\" fill=\"#ff0000\"/>\n",it->first,it->second);
-		fprintf(svg, "<text x=\"%.3f\" y=\"%.3f\" fill=\"red\"> %d </text>", it->first+2.5,it->second+2.5, i);
+		fprintf(svg,"<circle r=\"2.5\" cx=\"%.3f\" cy=\"%.3f\" stroke-width=\"5\" stroke=\"#000000\" fill=\"#ff0000\"/>\n",offset+(it->first),offset+(it->second));
+		fprintf(svg, "<text x=\"%.3f\" y=\"%.3f\" fill=\"red\"> %d </text>", offset+(it->first)+2.5,offset+(it->second)+2.5, i);
 	}
 	//drawing edges
 	for(std::vector<std::pair<int, int> >::iterator it = edges.begin();it!=edges.end();it++){
-		fprintf(svg,"<line x1=\"%.3f\" y1=\"%.3f\" x2=\"%.3f\" y2=\"%.3f\" stroke=\"#ff0000\" stroke-width=\"0.5\" fill-opacity=\"1.0\" fill=\"none\"/>",vertices[it->first].first,vertices[it->first].second,vertices[it->second].first,vertices[it->second].second);
+		fprintf(svg,"<line x1=\"%.3f\" y1=\"%.3f\" x2=\"%.3f\" y2=\"%.3f\" stroke=\"#ff0000\" stroke-width=\"0.5\" fill-opacity=\"1.0\" fill=\"none\"/>",offset+(vertices[it->first].first),offset+(vertices[it->first].second),offset+(vertices[it->second].first),offset+(vertices[it->second].second));
 	}
 
 	for(int i = 1; i<TSP.size(); i++){
-		drawArrow(svg, TSP[i-1], TSP[i]);
+		drawArrow(svg, offset+TSP[i-1], offset+TSP[i]);
 	}
 
-	for(int j = 0; j<vertices.size(); j++){
+	for(int j = 0; j<eCircuit.size(); j++){
 		fprintf(svg, "<text x=\"%.3f\" y=\"10.0\" fill=\"red\"> _%d_ </text>", 10.0+(j*30.0), eCircuit[j]);
 	}
 
