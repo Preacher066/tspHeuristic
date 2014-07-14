@@ -62,7 +62,7 @@ void GeomPerfectMatching::AddInitialEdge(PointId _i, PointId _j)
 
 GeomPerfectMatching::REAL GeomPerfectMatching::ComputeCost(PointId* matching)
 {
-	if (node_num != node_num_max) { printf("ComputeCost() cannot be called before all points have been added!\n"); exit(1); }
+	if (node_num != node_num_max) { /*printf("ComputeCost() cannot be called before all points have been added!\n");*/ exit(1); }
 
 	REAL cost = 0;
 	int i;
@@ -70,7 +70,7 @@ GeomPerfectMatching::REAL GeomPerfectMatching::ComputeCost(PointId* matching)
 	{
 		if (matching[i]==i || matching[i]<0 || matching[i]>=node_num || matching[matching[i]]!=i)
 		{
-			printf("ComputeCost(): not a valid matching!\n");
+			//printf("ComputeCost(): not a valid matching!\n");
 			exit(1);
 		}
 		if (matching[i] > i)

@@ -18,45 +18,87 @@ extern void drawLine(double x1, double y1, double x2, double y2);
 double dist(std::pair<double, double> p1, std::pair<double,double> p2);
 
 int main() {
-	/*fopen_s(&svg,"dfsTSP.svg","w");
-	std::vector<std::pair<double, double> > vertices;
-	//this is rsteiner
-	for(int i = 0; i < NUM_SENSORS; i++){
-	double x = uni();
-	double y = uni();
-	vertices.push_back(std::make_pair(x,y));
-	}
-	*/
 
-	//std::vector<std::pair<double, double> > vertices;
-	//FILE* vrt = fopen("Steiners\\50\\greedy0.txt","r");
-	//svg = fopen("gy0.svg","w");
-	//double x=0.0,y=0.0;
-	//while(fscanf(vrt,"%lf %lf",&x,&y)!=EOF){
-	//	std::pair<double, double> v = std::make_pair(x,y);
-	//	vertices.push_back(v);
-	//}
-	//Graph g(vertices);
-	//g.TSPCircuit(false);
-	//g.drawGraph(svg, MAX);
-	//fclose(svg);
-
-	//assert(_access("STrees\\1.vrt", 06)==0 && _access("STrees\\1.edg", 06)==0);
-	//assert(edg && vrt);
+	/**************************************for generating res.txt file in every folder******************************************************/
 	//for(int i=50;i<=100;i+=10){
-		//for(int j=0;j<=5;j++){
-			char fname[100];
-			sprintf(fname,"Steiners\\%d\\greedy%d.edg",50,2);
-			Steiner s(fname);
-			s.T = 1000.0;
-			s.driver(0);
-			char fname2[100];
-			sprintf(fname2,"Steiners\\50\\mule%d.svg",50,2);
-			svg = fopen(fname2,"w");
-			s.drawSteiner(svg);
-			fclose(svg);
-		//}
+	//	char fname2[100];
+	//	sprintf(fname2,"Steiners\\%d\\res.txt",i);
+	//	FILE* res = fopen(fname2,"w");
+	//	for(double T=1000.0;T<=12000.0;T+=100.0){
+	//		std::vector<int> ms;
+	//		for(int j=0;j<=5;j++){
+	//			char fname[100];
+	//			sprintf(fname,"Steiners\\%d\\greedy%d.edg",i,j);
+	//			Steiner s(fname);
+	//			s.T = T;
+	//			s.driver(0);
+	//			ms.push_back(s.tours.size());
+	//		
+	//			/*char fname2[100];
+	//			sprintf(fname2,"Steiners\\%d\\mule%d.svg",i,j);
+	//			svg = fopen(fname2,"w");
+	//			s.drawSteiner(svg);
+	//			fclose(svg);*/
+	//		}
+	//		printf("%f\n",T);
+	//		fprintf(res,"%.3f: ",T);
+	//		for(std::vector<int>::iterator it1=ms.begin();it1!=ms.end();it1++){
+	//			fprintf(res, "%d ",*it1);
+	//		}
+	//		fprintf(res,"\n");
+	//	}
+	//	fclose(res);
 	//}
+
+	/********************************************************************************************************************/
+
+	/***for generating res_avg.txt and res_lat.txt files in every folder using res.txt files in them (generated using above code)********/
+
+	FILE* res;
+	FILE* res_avg;
+	FILE* res_lat;
+	for(int i=50;i<=100;i+=10){
+		double record[20];
+		int count[20];
+		for(int l=0;l<20;l++) {count[l]=0;record[l]=0.0;}
+		char fname[100];
+		sprintf(fname,"Steiners\\%d\\res.txt",i);
+		char fname2[100];
+		sprintf(fname2,"Steiners\\%d\\res_avg.txt",i);
+		char fname3[100];
+		sprintf(fname3,"Steiners\\%d\\res_lat.txt",i);
+		res = fopen(fname,"r");
+		res_avg = fopen(fname2,"w");
+		res_lat = fopen(fname3,"w");
+		double lat=0.0,avg=0.0;
+		int m[6];
+		while(fscanf(res,"%lf: %d %d %d %d %d %d", &lat, m, m+1, m+2, m+3, m+4, m+5)!=EOF){
+			avg=m[0]+m[1]+m[2]+m[3]+m[4]+m[5];
+			avg=avg/6.0;
+			fprintf(res_avg,"%.3f: %.3f\n",lat,avg);
+			record[m[0]]+=lat;
+			count[m[0]]++;
+			record[m[1]]+=lat;
+			count[m[1]]++;
+			record[m[2]]+=lat;
+			count[m[2]]++;
+			record[m[3]]+=lat;
+			count[m[3]]++;
+			record[m[4]]+=lat;
+			count[m[4]]++;
+			record[m[5]]+=lat;
+			count[m[5]]++;
+		}
+		for(int k=17;k>=1;k--){
+			if(count[k])
+				fprintf(res_lat,"%d: %.3f\n",k, (double)(record[k]/count[k]));
+		}
+		fclose(res);
+		fclose(res_avg);
+		fclose(res_lat);
+	}
+
+	/********************************************************************************************************************/
 
 	//std::cin.get();
 	return 0;

@@ -106,7 +106,7 @@ public:
 		            update_duals_before(false),
 		            update_duals_after(false),
 		            single_tree_threshold(1.00),
-		            verbose(true)
+		            verbose(false)
 		{}
 
 		bool	fractional_jumpstart; // false: greedy, true: compute fractional matching

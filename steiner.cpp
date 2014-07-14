@@ -136,8 +136,19 @@ bool Steiner::explorer(){
 }
 
 void Steiner::driver(int root){
-boundary.push(root);
-while(explorer());
+	double largestEdge=0.0,ce=0.0;
+	for(std::vector<std::pair<int,int> >::iterator it = edgeList.begin(); it!=edgeList.end();it++){
+		ce=dist(vertices[it->first],vertices[it->second]);
+		if(ce > largestEdge)
+			largestEdge = ce;
+
+	}
+	if(T<2*largestEdge){
+		printf("\n\n**Latency not large enough**\n\n");
+		return;
+	}
+	boundary.push(root);
+	while(explorer());
 return;
 }
 
@@ -194,10 +205,7 @@ void Steiner::drawSteiner(FILE* svg){
 			CGAL::convex_hull_2(in.begin(), in.end(), std::back_inserter(out));
 			out.push_back(out[0]);
 
-			//drawing the convex hull
-			for(int i=out.size()-1;i>=1;i--){
-				//fprintf(*svg,"<line x1=\"%.3f\" y1=\"%.3f\" x2=\"%.3f\" y2=\"%.3f\" stroke=\"#00ff00\" stroke-width=\"2\" stroke-opacity=\"0.2\"/>\n",offset+(out[i].x()), offset+(out[i].y()), offset+(out[i-1].x()), offset+(out[i-1].y()));
-			}
+			
 		}
 	}
 	fprintf(svg, "<text x=\"500.0\" y=\"500.0\" style=\"fill: #ff0000; stroke: none; font-size: 40px;\"> %d </text>",tours.size());

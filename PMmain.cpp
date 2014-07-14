@@ -451,7 +451,7 @@ void PerfectMatching::Solve(bool finish)
 			exit(1);
 		}
 	}
-	if (options.verbose) { printf("perfect matching with %d nodes and %d edges\n", node_num, edge_num); fflush(stdout); }
+	if (options.verbose) { /*printf("perfect matching with %d nodes and %d edges\n", node_num, edge_num); fflush(stdout); */}
 
 	if (first_solve)
 	{
