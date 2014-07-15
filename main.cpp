@@ -20,41 +20,41 @@ double dist(std::pair<double, double> p1, std::pair<double,double> p2);
 int main() {
 
 	/**************************************for generating res.txt file in every folder******************************************************/
-	//for(int i=50;i<=100;i+=10){
-	//	char fname2[100];
-	//	sprintf(fname2,"Steiners\\%d\\res.txt",i);
-	//	FILE* res = fopen(fname2,"w");
-	//	for(double T=1000.0;T<=12000.0;T+=100.0){
-	//		std::vector<int> ms;
-	//		for(int j=0;j<=5;j++){
-	//			char fname[100];
-	//			sprintf(fname,"Steiners\\%d\\greedy%d.edg",i,j);
-	//			Steiner s(fname);
-	//			s.T = T;
-	//			s.driver(0);
-	//			ms.push_back(s.tours.size());
-	//		
-	//			/*char fname2[100];
-	//			sprintf(fname2,"Steiners\\%d\\mule%d.svg",i,j);
-	//			svg = fopen(fname2,"w");
-	//			s.drawSteiner(svg);
-	//			fclose(svg);*/
-	//		}
-	//		printf("%f\n",T);
-	//		fprintf(res,"%.3f: ",T);
-	//		for(std::vector<int>::iterator it1=ms.begin();it1!=ms.end();it1++){
-	//			fprintf(res, "%d ",*it1);
-	//		}
-	//		fprintf(res,"\n");
-	//	}
-	//	fclose(res);
-	//}
+	for(int i=50;i<=100;i+=10){
+		char fname2[100];
+		sprintf(fname2,"Steiners\\%d\\res.txt",i);
+		FILE* res = fopen(fname2,"w");
+		for(double T=1000.0;T<=12000.0;T+=100.0){
+			std::vector<int> ms;
+			for(int j=0;j<=5;j++){
+				char fname[100];
+				sprintf(fname,"Steiners\\%d\\greedy%d.edg",i,j);
+				Steiner s(fname);
+				s.T = T;
+				s.driver(0);
+				ms.push_back(s.tours.size());
+			
+				/*char fname2[100];
+				sprintf(fname2,"Steiners\\%d\\mule%d.svg",i,j);
+				svg = fopen(fname2,"w");
+				s.drawSteiner(svg);
+				fclose(svg);*/
+			}
+			printf("%f\n",T);
+			fprintf(res,"%.3f: ",T);
+			for(std::vector<int>::iterator it1=ms.begin();it1!=ms.end();it1++){
+				fprintf(res, "%d ",*it1);
+			}
+			fprintf(res,"\n");
+		}
+		fclose(res);
+	}
 
 	/********************************************************************************************************************/
 
 	/***for generating res_avg.txt and res_lat.txt files in every folder using res.txt files in them (generated using above code)********/
 
-	FILE* res;
+	/*FILE* res;
 	FILE* res_avg;
 	FILE* res_lat;
 	for(int i=50;i<=100;i+=10){
@@ -96,7 +96,7 @@ int main() {
 		fclose(res);
 		fclose(res_avg);
 		fclose(res_lat);
-	}
+	}*/
 
 	/********************************************************************************************************************/
 
