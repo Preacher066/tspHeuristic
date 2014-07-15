@@ -2,20 +2,27 @@
 
 extern double MAX;
 extern FILE* svg;
+extern double ASP;
+double extern MSPEED;
+
 
 extern double dist(std::pair<double, double> p1, std::pair<double,double> p2);
 
 double currT;
 std::queue<int> boundary;
 
-Steiner::Steiner(char* edgName){
+Steiner::Steiner(char* edgName, char* dscName){
 	FILE* edg = fopen(edgName,"r");
+	FILE* dsc = fopen(dscName,"r");
 	std::set<std::pair<double, double> > tvertices;
 	std::map<std::pair<double, double>, int> SMaker;
 	double x=0.0,y=0.0;
-	int s1=0,s2=0;
+	int s1=0,s2=0,d=0;
+	while(fscanf(dsc,"%lf %lf %d",&x,&y,&d)!=EOF){
+		coveredCount[std::make_pair(x,y)] = d;
+	}
+	fclose(dsc);
 	while(fscanf(edg,"%lf %lf %d",&x,&y,&s1)!=EOF){
-		//vrt >> x >> y >> s;
 		std::pair<double, double> v = std::make_pair(x,y);
 		tvertices.insert(v);
 		SMaker[v] = s1;
@@ -71,28 +78,43 @@ bool Steiner::explorer(){
 	curr=root;
 	visited[root]=true;
 	for (std::set<int>::iterator it = edges[curr].begin();it!=edges[curr].end();it++){
-		if(!visited[*it])
-		heap.push(std::make_pair(-1.0*dist(vertices[curr], vertices[*it]), std::make_pair(*it,curr)));
+		if(!visited[*it]){
+			double ed=0.0;
+			if(coveredCount.count(vertices[*it]) != 0)
+				ed=coveredCount[vertices[*it]];
+
+			heap.push(std::make_pair(-1.0*(2.0*dist(vertices[curr], vertices[*it]) + ed*ASP*MSPEED),
+				std::make_pair(*it,curr)));
+		}
 	}
 	vert.push_back(vertices[curr]);
 
 	while (!heap.empty()){
 		double nextWeight = -1.0*heap.top().first;
 		currT+=nextWeight;
-		if(currT>=0.5*T) break;
+		if(currT>=T) break;
 		curr=heap.top().second.first;
 		vert.push_back(vertices[curr]);
 		visited[curr]=true;
 		heap.pop();
 		for (std::set<int>::iterator it = edges[curr].begin();it!=edges[curr].end();it++){
-			if(!visited[*it])
-				heap.push(std::make_pair(-1.0*dist(vertices[curr], vertices[*it]), std::make_pair(*it,curr)));
+			if(!visited[*it]){
+				double ed=0.0;
+				if(coveredCount.count(vertices[*it]) != 0)
+					ed=coveredCount[vertices[*it]];
+
+				heap.push(std::make_pair(-1.0*(2.0*dist(vertices[curr], vertices[*it]) + ed*ASP*MSPEED),
+					std::make_pair(*it,curr)));
+			}
 		}
 	}
 
 	cleanTour(vert);
 	Graph g(vert);
 	double cycleWeight=g.TSPCircuit(false);
+	for(std::vector<std::pair<double, double> >::iterator it = vert.begin();it!=vert.end();it++){
+		cycleWeight+=coveredCount[*it]*ASP*MSPEED;
+	}
 
 	while (!heap.empty() && cycleWeight<T){
 		tvert=vert;
@@ -101,13 +123,22 @@ bool Steiner::explorer(){
 		cleanTour(tvert);
 		Graph g1(tvert);
 		cycleWeight=g1.TSPCircuit(false);
+		for(std::vector<std::pair<double, double> >::iterator it = tvert.begin();it!=tvert.end();it++){
+			cycleWeight+=coveredCount[*it]*ASP*MSPEED;
+		}
 		if(cycleWeight>T) break;
 		vert=tvert;
 		visited[curr]=true;
 		heap.pop();
 		for (std::set<int>::iterator it = edges[curr].begin();it!=edges[curr].end();it++){
-			if(!visited[*it])
-				heap.push(std::make_pair(-1.0*dist(vertices[curr], vertices[*it]), std::make_pair(*it,curr)));
+			if(!visited[*it]){
+				double ed=0.0;
+				if(coveredCount.count(vertices[*it]) != 0)
+					ed=coveredCount[vertices[*it]];
+
+				heap.push(std::make_pair(-1.0*(2.0*dist(vertices[curr], vertices[*it]) + ed*ASP*MSPEED),
+					std::make_pair(*it,curr)));
+			}
 		}
 	}
 

@@ -1,4 +1,3 @@
-//this is master
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
@@ -7,6 +6,8 @@
 
 int SEED=15, NUM_SENSORS=20;
 double MAX=1000.0;
+double ASP=1.0;
+double MSPEED=1.0;
 base_generator_type generator(SEED);
 boost::uniform_real<> uni_dist(0.0,MAX);
 boost::variate_generator<base_generator_type&, boost::uniform_real<> > uni(generator, uni_dist);
@@ -27,9 +28,11 @@ int main() {
 		for(double T=1000.0;T<=12000.0;T+=100.0){
 			std::vector<int> ms;
 			for(int j=0;j<=5;j++){
-				char fname[100];
-				sprintf(fname,"Steiners\\%d\\greedy%d.edg",i,j);
-				Steiner s(fname);
+				char fname[50];
+				sprintf(fname,"Steiners\\%d\\Steiner trees\\greedy%d.edg",i,j);
+				char fname3[50];
+				sprintf(fname3,"Steiners\\%d\\Disc placement\\greedy%d.txt",i,j);
+				Steiner s(fname,fname3);
 				s.T = T;
 				s.driver(0);
 				ms.push_back(s.tours.size());
