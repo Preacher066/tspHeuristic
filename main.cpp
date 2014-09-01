@@ -1,7 +1,7 @@
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
-#include "steiner.h"
+#include "MST.h"
 
 
 int SEED=15, NUM_SENSORS=20;
@@ -25,23 +25,26 @@ int main() {
 	//	char fname2[100];
 	//	sprintf(fname2,"Steiners\\%d\\PResults\\res.txt",i);
 	//	FILE* res = fopen(fname2,"w");
-	//	for(double T=1000.0;T<=18000.0;T+=100.0){
+	//	for(double T=2000.0;T<=25000.0;T+=100.0){
 	//		std::vector<int> ms;
 	//		ASP = ((T/MSPEED)*4*8)/(13.4*1024);
 	//		for(int j=0;j<=5;j++){
-	//			char fname[50];
-	//			sprintf(fname,"Steiners\\%d\\Steiner trees\\greedy%d.edg",i,j);
 	//			char fname3[50];
 	//			sprintf(fname3,"Steiners\\%d\\Disc placement\\greedy%d.txt",i,j);
-	//			Steiner s(fname,fname3);
+	//			MST s(fname3);
 	//			s.T = T;
-	//			s.driver(0);
-	//			ms.push_back(s.tours.size());
+	//			if(T>=s.totalTourWeight)
+	//				ms.push_back(1);
+	//			else
+	//				if(s.driver(0))
+	//					ms.push_back(s.tours.size());
+	//				else
+	//					ms.push_back(-1);
 	//		
 	//			/*char fname2[100];
 	//			sprintf(fname2,"Steiners\\%d\\mule%d.svg",i,j);
 	//			svg = fopen(fname2,"w");
-	//			s.drawSteiner(svg);
+	//			s.drawMST(svg);
 	//			fclose(svg);*/
 	//		}
 	//		printf("%d: %f\n",i,T);
@@ -106,7 +109,7 @@ int main() {
 	}
 
 	/********************************************************************************************************************/
-
-	//std::cin.get();
+	printf("done\n");
+	std::cin.get();
 	return 0;
 }

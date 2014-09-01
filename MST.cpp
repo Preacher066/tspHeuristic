@@ -13,11 +13,13 @@ std::queue<int> boundary;
 
 MST::MST(char* dscName){
 	FILE* dsc = fopen(dscName,"r");
-	double x=0.0,y=0.0;
+	double x=0.0,y=0.0,td=0.0;
 	int i=0,d=0;
 	while(fscanf(dsc,"%lf %lf %d",&x,&y,&d)!=EOF){
 		vertices.push_back(std::make_pair(x,y));
+		visited.push_back(false);
 		coveredCount[std::make_pair(x,y)] = d;
+		td+=d;
 		edgeMaker[std::make_pair(x,y)] = i;
 		i++;
 	}
@@ -27,7 +29,12 @@ MST::MST(char* dscName){
 	g.MST();
 	edges = new std::set<int>[vertices.size()];
 	edgeList = g.edges;
-	
+	for(std::vector<std::pair<int, int> >::iterator it = edgeList.begin(); it!=edgeList.end();it++){
+		edges[it->first].insert(it->second);
+		edges[it->second].insert(it->first);
+	}
+
+	totalTourWeight=g.TSPCircuit(false)+(td*ASP*MSPEED);
 }
 
 MST::~MST(){
@@ -52,8 +59,7 @@ bool MST::explorer(){
 	for (std::set<int>::iterator it = edges[curr].begin();it!=edges[curr].end();it++){
 		if(!visited[*it]){
 			double ed=0.0;
-			if(coveredCount.count(vertices[*it]) != 0)
-				ed=coveredCount[vertices[*it]];
+			ed=coveredCount[vertices[*it]];
 
 			heap.push(std::make_pair(-1.0*(2.0*dist(vertices[curr], vertices[*it]) + ed*ASP*MSPEED),
 				std::make_pair(*it,curr)));
@@ -72,8 +78,7 @@ bool MST::explorer(){
 		for (std::set<int>::iterator it = edges[curr].begin();it!=edges[curr].end();it++){
 			if(!visited[*it]){
 				double ed=0.0;
-				if(coveredCount.count(vertices[*it]) != 0)
-					ed=coveredCount[vertices[*it]];
+				ed=coveredCount[vertices[*it]];
 
 				heap.push(std::make_pair(-1.0*(2.0*dist(vertices[curr], vertices[*it]) + ed*ASP*MSPEED),
 					std::make_pair(*it,curr)));
@@ -81,7 +86,7 @@ bool MST::explorer(){
 		}
 	}
 
-	cleanTour(vert);
+	//cleanTour(vert);
 	Graph g(vert);
 	double cycleWeight=g.TSPCircuit(false);
 	for(std::vector<std::pair<double, double> >::iterator it = vert.begin();it!=vert.end();it++){
@@ -92,7 +97,7 @@ bool MST::explorer(){
 		tvert=vert;
 		curr=heap.top().second.first;
 		tvert.push_back(vertices[curr]);
-		cleanTour(tvert);
+		//cleanTour(tvert);
 		Graph g1(tvert);
 		cycleWeight=g1.TSPCircuit(false);
 		for(std::vector<std::pair<double, double> >::iterator it = tvert.begin();it!=tvert.end();it++){
@@ -105,8 +110,7 @@ bool MST::explorer(){
 		for (std::set<int>::iterator it = edges[curr].begin();it!=edges[curr].end();it++){
 			if(!visited[*it]){
 				double ed=0.0;
-				if(coveredCount.count(vertices[*it]) != 0)
-					ed=coveredCount[vertices[*it]];
+				ed=coveredCount[vertices[*it]];
 
 				heap.push(std::make_pair(-1.0*(2.0*dist(vertices[curr], vertices[*it]) + ed*ASP*MSPEED),
 					std::make_pair(*it,curr)));
@@ -138,7 +142,7 @@ bool MST::explorer(){
 	return true;
 }
 
-void MST::driver(int root){
+bool MST::driver(int root){
 	double largestEdge=0.0,ce=0.0;
 	for(std::vector<std::pair<int,int> >::iterator it = edgeList.begin(); it!=edgeList.end();it++){
 		ce=dist(vertices[it->first],vertices[it->second]);
@@ -148,11 +152,11 @@ void MST::driver(int root){
 	}
 	if(T<2*largestEdge){
 		printf("\n\n**Latency not large enough**\n\n");
-		return;
+		return false;
 	}
 	boundary.push(root);
 	while(explorer());
-return;
+return true;
 }
 
 void MST::drawMST(FILE* svg){
@@ -165,8 +169,7 @@ void MST::drawMST(FILE* svg){
 	//drawing vertices
 	int i=0;
 	for(std::vector<std::pair<double, double> >::iterator it = vertices.begin();it!=vertices.end();it++,i++){
-		if(MST[i] == 0) fprintf(svg,"<circle r=\"3\" cx=\"%f\" cy=\"%f\" fill=\"#ff0000\"/>\n",offset+it->first,offset+it->second);
-		else fprintf(svg,"<circle r=\"2\" cx=\"%f\" cy=\"%f\" fill=\"#000000\"/>\n",offset+it->first,offset+it->second);
+		fprintf(svg,"<circle r=\"2\" cx=\"%f\" cy=\"%f\" fill=\"#000000\"/>\n",offset+it->first,offset+it->second);
 		fprintf(svg, "<text x=\"%f\" y=\"%f\" style=\"fill: #ff0000; stroke: none; font-size: 11px;\"> %d </text>", offset+it->first+2.5,offset+it->second+2.5, i);
 	}
 		//drawing edges
@@ -174,25 +177,25 @@ void MST::drawMST(FILE* svg){
 		fprintf(svg,"<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"#0000ff\" stroke-width=\"1\" stroke-opacity=\"1\"/>\n",offset+(vertices[it->first].first),offset+(vertices[it->first].second),offset+(vertices[it->second].first),offset+(vertices[it->second].second));
 	}
 
-	for(std::set<std::vector<std::pair<double, double> > >::iterator it = tours.begin();it!=tours.end();it++){
-		std::vector<Point> in,out;
-		std::vector<std::pair<double, double> > in1;
-		in1=*it;
+	//for(std::set<std::vector<std::pair<double, double> > >::iterator it = tours.begin();it!=tours.end();it++){
+	//	std::vector<Point> in,out;
+	//	std::vector<std::pair<double, double> > in1;
+	//	in1=*it;
 
-		if(in1.size()>0){
-			//drawing the tour itself
-			for(int i=in1.size()-1;i>=1;i--){
-				fprintf(svg,"<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"#ffff00\" stroke-width=\"1\"/>\n",offset+(in1[i].first), offset+(in1[i].second), offset+(in1[i-1].first), offset+(in1[i-1].second));
-				in.push_back(Point(in1[i].first, in1[i].second));
-			}
-			in.push_back(Point(in1[0].first, in1[0].second));
-			CGAL::convex_hull_2(in.begin(), in.end(), std::back_inserter(out));
-			out.push_back(out[0]);
+	//	if(in1.size()>0){
+	//		//drawing the tour itself
+	//		for(int i=in1.size()-1;i>=1;i--){
+	//			fprintf(svg,"<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"#ffff00\" stroke-width=\"1\"/>\n",offset+(in1[i].first), offset+(in1[i].second), offset+(in1[i-1].first), offset+(in1[i-1].second));
+	//			in.push_back(Point(in1[i].first, in1[i].second));
+	//		}
+	//		in.push_back(Point(in1[0].first, in1[0].second));
+	//		CGAL::convex_hull_2(in.begin(), in.end(), std::back_inserter(out));
+	//		out.push_back(out[0]);
 
-			
-		}
-	}
-	fprintf(svg, "<text x=\"500.0\" y=\"500.0\" style=\"fill: #ff0000; stroke: none; font-size: 40px;\"> %d </text>",tours.size());
+	//		
+	//	}
+	//}
+	//fprintf(svg, "<text x=\"500.0\" y=\"500.0\" style=\"fill: #ff0000; stroke: none; font-size: 40px;\"> %d </text>",tours.size());
 	fprintf(svg,"</g>\n</svg>\n");
 
 	return;
