@@ -34,9 +34,13 @@ int main() {
 	//			char fname3[50];
 	//			sprintf(fname3,"Steiners\\%d\\Disc placement\\greedy%d.txt",i,j);
 	//			Steiner s(fname,fname3);
-	//			s.T = T;
-	//			s.driver(0);
-	//			ms.push_back(s.tours.size());
+	//			if(T>=s.totalTourWeight)
+	//				ms.push_back(1);
+	//			else{
+	//				s.T = T;
+	//				s.driver(0);
+	//				ms.push_back(s.tours.size());
+	//			}
 	//		
 	//			/*char fname2[100];
 	//			sprintf(fname2,"Steiners\\%d\\mule%d.svg",i,j);

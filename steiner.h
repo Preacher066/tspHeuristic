@@ -12,6 +12,7 @@ void driver(int root);
 void cleanTour(std::vector<std::pair<double,double> >& vert);
 
 double T;
+double totalTourWeight;
 std::vector<std::pair<double,double> > vertices;
 std::vector<bool> visited;
 std::set<int>* edges;

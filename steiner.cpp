@@ -16,10 +16,11 @@ Steiner::Steiner(char* edgName, char* dscName){
 	FILE* dsc = fopen(dscName,"r");
 	std::set<std::pair<double, double> > tvertices;
 	std::map<std::pair<double, double>, int> SMaker;
-	double x=0.0,y=0.0;
+	double x=0.0,y=0.0, td=0.0;
 	int s1=0,s2=0,d=0;
 	while(fscanf(dsc,"%lf %lf %d",&x,&y,&d)!=EOF){
 		coveredCount[std::make_pair(x,y)] = d;
+		td+=d;
 	}
 	fclose(dsc);
 	while(fscanf(edg,"%lf %lf %d",&x,&y,&s1)!=EOF){
@@ -55,6 +56,9 @@ Steiner::Steiner(char* edgName, char* dscName){
 		edgeList.push_back(std::make_pair(i1,i2));
 	}
 	fclose(edg);
+
+	Graph g(vertices);
+	totalTourWeight = g.TSPCircuit(false)+(td*ASP*MSPEED);
 }
 
 Steiner::~Steiner(){
